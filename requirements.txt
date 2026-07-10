@@ -1,0 +1,12 @@
+# Core pipeline
+faster-whisper>=1.0.3
+scenedetect[opencv]>=0.6.4
+mediapipe>=0.10.14
+opencv-python>=4.9.0.80
+numpy>=1.26
+pyyaml>=6.0.1
+pillow>=10.3
+requests>=2.31
+
+# Dev / tests
+pytest>=8.0

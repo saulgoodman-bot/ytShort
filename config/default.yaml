@@ -1,0 +1,116 @@
+# AutoShorts default configuration.
+# Copy to config/local.yaml to override — local.yaml wins over default.yaml.
+
+app:
+  input_dir: input
+  output_dir: output
+  clips_dir: clips
+  cache_dir: cache
+  transcripts_dir: transcripts
+  thumbnails_dir: thumbnails
+  logs_dir: logs
+
+whisper:
+  # tiny | base | small | medium | large-v3
+  # On a MacBook Air (CTranslate2 is CPU-only on macOS), "small" or "medium"
+  # is the realistic quality/speed tradeoff. large-v3 is best for Telugu
+  # accuracy but roughly 3-4x slower.
+  model: medium
+  language: te          # null = autodetect (handles Telugu/English code-mixing)
+  device: auto          # auto | cpu
+  compute_type: int8
+  word_timestamps: true
+  vad_filter: true
+  beam_size: 5
+
+llm:
+  provider: ollama
+  host: "http://localhost:11434"
+  model: "qwen3:8b"     # alternatives: gemma3:12b, llama3.1:8b, mistral
+  temperature: 0.4
+  timeout_seconds: 300
+  max_retries: 2
+
+clips:
+  min_duration: 20.0
+  max_duration: 60.0
+  min_shorts: 5
+  max_shorts: 8
+  snap_to_sentences: true   # never cut mid-sentence
+  max_overlap: 0.15         # reject candidates overlapping selected clips more than this
+
+scoring:
+  weights:
+    emotion: 0.20
+    curiosity: 0.20
+    storytelling: 0.15
+    keywords: 0.10
+    energy: 0.10
+    visual: 0.10
+    trend: 0.10
+    engagement: 0.05
+  penalties:
+    silence: 0.05
+    duplicate: 0.05
+  duplicate_similarity_threshold: 0.55
+
+scenes:
+  detector: content     # content | adaptive
+  threshold: 27.0
+  min_scene_len_seconds: 1.0
+
+faces:
+  sample_fps: 2.0
+  min_detection_confidence: 0.5
+  smoothing_alpha: 0.85
+
+crop:
+  # center        : dumb center crop
+  # smart_static  : one crop window per clip from median face position (default)
+  # smart_dynamic : moving crop following the face (experimental)
+  mode: smart_static
+  dynamic_keyframe_interval: 2.0
+
+subtitles:
+  style: tiktok         # classic | modern | bold | minimal | tiktok
+  font: "Noto Sans Telugu"
+  fallback_font: "Arial Unicode MS"
+  font_size: 64
+  primary_color: "#FFFFFF"
+  highlight_color: "#FFD400"
+  outline_color: "#000000"
+  outline: 3
+  shadow: 1
+  karaoke: true
+  max_words_per_line: 4
+  margin_v: 260
+
+render:
+  width: 1080
+  height: 1920
+  fps: 30
+  video_bitrate: "8M"
+  audio_bitrate: "192k"
+  encoder: auto         # auto -> h264_videotoolbox on macOS, libx264 elsewhere
+  preset: medium
+
+audio:
+  sample_rate: 16000
+  denoise: true
+  normalize: true
+
+metadata:
+  generate_titles: true
+  generate_description: true
+  generate_hashtags: true
+  n_titles: 5
+  n_hashtags: 15
+
+thumbnails:
+  enabled: true
+  overlay_text: true
+  font_size: 110
+
+trends:
+  enabled: false        # offline by default
+  keywords: []          # manual trend keywords always applied if non-empty
