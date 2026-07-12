@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
+import torch
 
 from app.utils.errors import TranscriptionError
 
@@ -30,13 +31,25 @@ def transcribe(
             "faster-whisper is not installed. Run: pip install -r requirements.txt"
         ) from exc
 
-    resolved_device = "cpu" if device == "auto" else device
+    # --- GPU DETECT & OPTIMIZATION ---
+    if device == "auto":
+        resolved_device = "cuda" if torch.cuda.is_available() else "cpu"
+    else:
+        resolved_device = device
+        
+    # Upgrade compute_type from int8 to float16 on the GPU for maximum speed
+    if resolved_device == "cuda" and compute_type == "int8":
+        resolved_compute = "float16"
+    else:
+        resolved_compute = compute_type
+    # ---------------------------------
+
     log.info(
         "Loading Whisper model '%s' (device=%s, compute=%s)…",
-        model_name, resolved_device, compute_type,
+        model_name, resolved_device, resolved_compute,
     )
     try:
-        model = WhisperModel(model_name, device=resolved_device, compute_type=compute_type)
+        model = WhisperModel(model_name, device=resolved_device, compute_type=resolved_compute)
     except Exception as exc:
         raise TranscriptionError(f"Could not load Whisper model '{model_name}': {exc}") from exc
 
